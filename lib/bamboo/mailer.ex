@@ -116,14 +116,16 @@ defmodule Bamboo.Mailer do
   def deliver_now(adapter, email, config) do
     email = email |> validate_and_normalize(adapter)
 
-    if email.to == [] && email.cc == [] && email.bcc == [] do
-      debug_unsent(email)
-    else
-      debug_sent(email, adapter)
-      adapter.deliver(email, config)
-    end
+    response =
+      if email.to == [] && email.cc == [] && email.bcc == [] do
+        debug_unsent(email)
+        nil
+      else
+        debug_sent(email, adapter)
+        adapter.deliver(email, config)
+      end
 
-    email
+    Map.put(email, :response, response)
   end
 
   @doc false
